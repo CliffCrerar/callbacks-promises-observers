@@ -4,15 +4,21 @@ console.log('Hello callbacks-promises-observer');
 
 const byId = (id) => document.getElementById(id);
 const create = (el) => document.createElement(el);
-
-
+const append = (parent, child) => parent.appendChild(child);
 /*  */
 
 const mainTag = byId('dataView');
 console.log('mainTag: ', mainTag);
+const addDiv = create('div');
+const myFetchResult = create('div');
+const myFetchAsyncResult = create('div');
 const errorDiv = create('div');
 console.log('errorDiv: ', errorDiv);
-mainTag.appendChild(errorDiv);
+
+[errorDiv, addDiv, myFetchResult, myFetchAsyncResult]
+    .forEach(el => {
+        append(mainTag, el);
+    });
 
 /*  */
 
@@ -30,6 +36,7 @@ function add(a, b, callback) {
 
 const result = add(1, 2, (result) => {
     console.log('result: ', result);
+    addDiv.innerText = result;
 });
 
 // Example 2 Node.JS callback
@@ -56,15 +63,16 @@ const result = add(1, 2, (result) => {
 
 // Example 3 Http Call
 
-async function mySyncFetch(uri) {
-    const fetchExecute = await fetch(uri); 
-    console.log('fetchExecute: ', fetchExecute);
-    
+async function myAsyncFetch(uri) {
+    const fetchExecute = await fetch(uri);
+    // console.log('fetchExecute: ', fetchExecute);
+    const result = await fetchExecute.json()
+    return result;
 }
 
 function myFetch(uri, callback) {
     const fetchExecute = fetch(uri);
-    console.log('fetchExecute: ', fetchExecute);
+    // console.log('fetchExecute: ', fetchExecute);
 
     fetchExecute.then(response => {
         console.log(response);
@@ -84,15 +92,43 @@ function myFetch(uri, callback) {
     })
 }
 
-myFetch(resource, (err, data) => {
+myFetch(resource, myFetchHandler);
+
+
+function myFetchHandler(err, data) {
     if (err) {
         errorDiv.innerText = err.message;
-        console.error(err.message);
+        console.error('myFetchHandlerError: ', err.message);
     }
 
-    console.log(data);
+    console.log('myFetchHandler: ', data);
+    myFetchResult.innerText = 'myFetchResult: ' + JSON.stringify(data);
+}
 
-});
+const mySyncFetchResult = myAsyncFetch(resource)
 
-const mySyncFetchResult = mySyncFetch(resource);
+mySyncFetchResult
+    .then(data => {
+        console.log(data);
+        myFetchAsyncResult.innerText = '\n myFetchAsyncResult Then 1: ' + JSON.stringify(data);
+        return data.data[0];
+    })
+    .then(oneRow => {
+        console.log('oneRow: ', oneRow);
+        myFetchAsyncResult.innerText += '\n myFetchAsyncResult Then 2: ' + JSON.stringify(oneRow);
+        return oneRow.Name;
+    })
+    .then(name => {
+        myFetchAsyncResult.innerText += '\n myFetchAsyncResult Then 3: ' + name;
+        console.log(name)
+    })
+
+
+mySyncFetchResult.catch(error => {
+    console.error(error);
+})
+
+mySyncFetchResult.finally(() => {
+    console.log('FINALLY');
+})
 console.log('mySyncFetchResult: ', mySyncFetchResult);
