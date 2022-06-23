@@ -1,0 +1,14 @@
+{
+  "data": [ 
+      {
+        "Name":"Kobus",
+        "Age": 340,
+        "Company":["Infinity Arc"]
+      },
+      {
+        "Name": "Cliff",
+        "Age":903,
+        "Company":["Infinity Arc", "BidVest", "Nuud"]
+      }
+    ]
+}
